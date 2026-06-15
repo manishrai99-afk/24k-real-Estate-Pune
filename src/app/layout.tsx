@@ -3,6 +3,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import EnquiryModal from '@/components/EnquiryModal';
+import MobileActionBar from '@/components/MobileActionBar';
 
 export const metadata: Metadata = {
   title: '24K Realtors | Premium Real Estate Consultants & Channel Partners',
@@ -28,6 +29,7 @@ export default function RootLayout({
         <main style={{ flexGrow: 1 }}>{children}</main>
         <Footer />
         <EnquiryModal />
+        <MobileActionBar />
       </body>
     </html>
   );

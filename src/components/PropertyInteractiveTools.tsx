@@ -209,7 +209,7 @@ export default function PropertyInteractiveTools({
                 Channel Partner Advisory Statement
               </h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '1.5rem' }}>
-                24K Realtors acts as a direct, authorized partner representing this project. We have audited the builder agreement documents and title clear registries. Under our "Transparency over Sales Pressure" guidelines, we provide you direct builder prices with no additional broker charges.
+                24K Realtors acts as a direct, authorized partner representing this project. We have audited the builder agreement documents and title clear registries. Under our &ldquo;Transparency over Sales Pressure&rdquo; guidelines, we provide you direct builder prices with no additional broker charges.
               </p>
               
               <div style={{
@@ -307,7 +307,7 @@ export default function PropertyInteractiveTools({
 
         {/* PANEL 3: Financial Calculators */}
         {activeTab === 'calc' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: '2rem' }}>
             
             {/* EMI Calculator */}
             <div className="glass-panel" style={{ padding: '2rem', borderRadius: '12px' }}>

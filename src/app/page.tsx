@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { db } from '@/lib/db';
 import PropertyFilters from '@/components/PropertyFilters';
 import PropertyCard from '@/components/PropertyCard';
@@ -309,9 +310,9 @@ export default async function Home({ searchParams }: HomeProps) {
             color: 'var(--text-secondary)',
           }}>
             <p style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>No projects matched your selected filtering parameters.</p>
-            <a href="/" className="btn-outline" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem' }}>
+            <Link href="/" className="btn-outline" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem' }}>
               Clear Search Criteria
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid-listings">
@@ -442,7 +443,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 lineHeight: '1.6',
                 flexGrow: 1,
               }}>
-                "{t.text}"
+                &ldquo;{t.text}&rdquo;
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: '0.5rem' }}>

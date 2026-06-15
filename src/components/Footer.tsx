@@ -30,7 +30,7 @@ export default function Footer() {
               24K REALTORS
             </h3>
             <p style={{ lineHeight: '1.7', marginBottom: '1.5rem' }}>
-              We partner directly with India's top-tier builders to represent fully authorized, verifiably clean real estate projects. Transparency over sales pressure.
+              We partner directly with India&apos;s top-tier builders to represent fully authorized, verifiably clean real estate projects. Transparency over sales pressure.
             </p>
             <div style={{
               display: 'flex',

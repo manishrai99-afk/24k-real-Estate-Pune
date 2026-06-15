@@ -265,4 +265,42 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--gold-primary);
 }
 
+/* Mobile Optimizations and Keyframes */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Fluid responsive headers */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2.2rem !important;
+  }
+  h2 {
+    font-size: 1.6rem !important;
+  }
+  .container {
+    padding: 0 1rem !important;
+  }
+}
