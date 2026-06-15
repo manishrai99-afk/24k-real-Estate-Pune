@@ -1,0 +1,237 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  ADVISOR
+  CLIENT
+  BUILDER_REP
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  PLOT
+  COMMERCIAL
+}
+
+enum ConstructionStatus {
+  NEW_LAUNCH
+  UNDER_CONSTRUCTION
+  READY_TO_MOVE
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  SITE_VISIT_SCHEDULED
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  phone        String    @unique
+  role         Role      @default(CLIENT)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  assignedLeads Lead[]    @relation("AdvisorLeads")
+  bookings      Booking[] @relation("AdvisorBookings")
+  activities    AdminActivity[]
+
+  @@index([role])
+}
+
+model Builder {
+  id              String     @id @default(uuid())
+  name            String     @unique
+  logoUrl         String?
+  description     String
+  establishedYear Int?
+  websiteUrl      String?
+  reraNumber      String?    // Builder corporate RERA
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Relations
+  properties      Property[]
+  commissions     Commission[]
+}
+
+model Property {
+  id                 String             @id @default(uuid())
+  title              String
+  slug               String             @unique
+  description        String
+  builderId          String
+  builder            Builder            @relation(fields: [builderId], references: [id], onDelete: Cascade)
+  propertyType       PropertyType
+  constructionStatus ConstructionStatus
+  minPrice           Decimal            @db.Decimal(12, 2)
+  maxPrice           Decimal            @db.Decimal(12, 2)
+  currency           String             @default("INR")
+  bhkConfig          Int[]              // Array of integers, e.g. [2, 3, 4] for 2/3/4 BHK
+  microMarket        String             // e.g. "Gachibowli", "Whitefield"
+  locality           String             // e.g. "Financial District"
+  city               String             // e.g. "Hyderabad"
+  state              String             // e.g. "Telangana"
+  latitude           Float?
+  longitude          Float?
+  reraNumber         String             @unique // Mandatory compliance display
+  isFeatured         Boolean            @default(false)
+  virtualTourUrl     String?            // Matterport or 3D render link
+  walkthroughVideoUrl String?           // YouTube or S3 video link
+  viewsCount         Int                @default(0)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  // Relations
+  floorPlans         FloorPlan[]
+  amenities          PropertyAmenity[]
+  leads              Lead[]
+  bookings           Booking[]
+  reviews            Review[]
+  commissions        Commission[]
+
+  @@index([propertyType, constructionStatus])
+  @@index([minPrice, maxPrice])
+  @@index([city, microMarket])
+  @@index([isFeatured])
+}
+
+model FloorPlan {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name        String   // e.g., "Premium 3BHK Penthouse"
+  bhk         Int
+  sizeSqFt    Int
+  price       Decimal  @db.Decimal(12, 2)
+  imageUrl    String
+  createdAt   DateTime @default(now())
+
+  @@index([propertyId])
+}
+
+model Amenity {
+  id          String            @id @default(uuid())
+  name        String            @unique // e.g. "Swimming Pool", "Clubhouse"
+  iconName    String            // Lucide/FontAwesome icon name
+  properties  PropertyAmenity[]
+}
+
+model PropertyAmenity {
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenityId  String
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, amenityId])
+}
+
+model Lead {
+  id           String     @id @default(uuid())
+  name         String
+  phone        String     // Validate 10-digit number
+  email        String?
+  leadSource   String     // e.g. "URL: /properties/luxury-villa-1"
+  status       LeadStatus @default(NEW)
+  message      String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  
+  // Dynamic Advisor Assignment
+  advisorId    String?
+  advisor      User?      @relation("AdvisorLeads", fields: [advisorId], references: [id], onDelete: SetNull)
+  
+  propertyId   String?
+  property     Property?  @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  bookings     Booking[]
+
+  @@index([status])
+  @@index([advisorId])
+  @@index([phone])
+}
+
+model Booking {
+  id          String        @id @default(uuid())
+  leadId      String
+  lead        Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  propertyId  String
+  property    Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  advisorId   String?
+  advisor     User?         @relation("AdvisorBookings", fields: [advisorId], references: [id], onDelete: SetNull)
+  scheduledAt DateTime      // Chosen date and time
+  status      BookingStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+model Review {
+  id          String    @id @default(uuid())
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  authorName  String
+  rating      Int       // 1 to 5
+  content     String
+  isVerified  Boolean   @default(true)
+  isPublished Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  @@index([isPublished, rating])
+}
+
+model Commission {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  builderId  String
+  builder    Builder  @relation(fields: [builderId], references: [id], onDelete: Cascade)
+  percentage Decimal? @db.Decimal(5, 2) // e.g. 2.50 for 2.5%
+  flatFee    Decimal? @db.Decimal(12, 2)
+  terms      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([propertyId])
+  @@index([builderId])
+}
+
+model AdminActivity {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // e.g. "UPDATE_PROPERTY", "ARCHIVE_LEAD"
+  details   String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
